@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dart_vlc
   dynamic_color
   flutter_native_view
+  media_kit_core_video
   permission_handler_windows
   screen_retriever
   share_plus

@@ -34,6 +34,11 @@ dependencies:
       # 0.3.0 - synced with original github repo, they now use higher version of vlclib
       url: "https://github.com/NANI-SORE/dart_vlc.git"
       ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
+  media_kit:
+      path: "/home/quack/code/flutter/media_kit/media_kit"
+  media_kit_core_video:
+      path: "/home/quack/code/flutter/media_kit/media_kit_core_video"
+  path: ^1.8.2
   dio: ^4.0.5
   dropdown_search: ^5.0.5
   dynamic_color: ^1.5.4
