@@ -41,7 +41,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  final controller = Player();
+  //do a thing
+  final Player controller = Player();
   //Player? controller;
   VideoController? vidcontroller;
   Media? media;
@@ -223,6 +224,12 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      vidcontroller = await VideoController.create(controller.handle);
+      setState(() {});
+     });
+          
     viewerHandler.addViewed(widget.key);
 
     viewController..outputStateStream.listen(onViewStateChanged);
@@ -257,7 +264,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void updateState() {
     if(mounted) {
-      final vidcontroller = VideoController.create(controller.handle);
+      
       setState(() { });
     }
   }
