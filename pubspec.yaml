@@ -36,8 +36,10 @@ dependencies:
       ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
   media_kit:
     path: "../media_kit/media_kit"
-  media_kit_core_video:
-    path: "../media_kit/media_kit_core_video"
+  media_kit_video:
+    path: "../media_kit/media_kit_video"
+  media_kit_libs_windows_video:
+    path: "../media_kit/media_kit_libs_windows_video"
   path: ^1.8.2
   dio: ^4.0.5
   dropdown_search: ^5.0.5

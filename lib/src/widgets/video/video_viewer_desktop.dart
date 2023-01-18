@@ -2,19 +2,17 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/gestures.dart';
+//import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-//import 'package:dart_vlc/dart_vlc.dart';
-
 import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_core_video/media_kit_core_video.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'package:path/path.dart' as path;
+//import 'package:path/path.dart' as path;
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -33,6 +31,118 @@ class VideoViewerDesktop extends StatefulWidget {
   @override
   State<VideoViewerDesktop> createState() => VideoViewerDesktopState();
 }
+
+//begin seekbar
+class SeekBar extends StatefulWidget {
+  final Player vidcontroller;
+  const SeekBar({
+    Key? key,
+    required this.vidcontroller,
+  }) : super(key: key);
+
+  @override
+  State<SeekBar> createState() => _SeekBarState();
+}
+
+class _SeekBarState extends State<SeekBar> {
+  bool isPlaying = false;
+  Duration position = Duration.zero;
+  Duration duration = Duration.zero;
+  double volume = 0.5;
+
+  List<StreamSubscription> subscriptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    isPlaying = widget.vidcontroller.state.isPlaying;
+    position = widget.vidcontroller.state.position;
+    duration = widget.vidcontroller.state.duration;
+    volume = widget.vidcontroller.state.volume;
+    
+    subscriptions.addAll(
+      [
+        widget.vidcontroller.streams.isPlaying.listen((event) {
+          setState(() {
+            isPlaying = event;
+          });
+        }),
+        widget.vidcontroller.streams.position.listen((event) {
+          setState(() {
+            position = event;
+          });
+        }),
+        widget.vidcontroller.streams.duration.listen((event) {
+          setState(() {
+            duration = event;
+          });
+        }),
+        widget.vidcontroller.streams.volume.listen((event) {
+          setState(() {
+            volume = event;
+          });
+        }),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (final s in subscriptions) {
+      s.cancel();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: widget.vidcontroller.playOrPause,
+            icon: Icon(
+              isPlaying ? Icons.pause : Icons.play_arrow,
+            ),
+            color: Theme.of(context).toggleableActiveColor,
+            iconSize: 36.0,
+          ),
+          Text(position.toString().substring(2, 7)),
+          Expanded(
+            child: Slider(
+              min: 0.0,
+              max: duration.inMilliseconds.toDouble(),
+              value: position.inMilliseconds.toDouble().clamp(
+                    0,
+                    duration.inMilliseconds.toDouble(),
+                  ),
+              onChanged: (e) {
+                setState(() {
+                  position = Duration(milliseconds: e ~/ 1);
+                });
+              },
+              onChangeEnd: (e) {
+                widget.vidcontroller.seek(Duration(milliseconds: e ~/ 1));
+              },
+            ),
+          ),
+          Text(duration.toString().substring(2, 7)),
+          //IconButton(
+          //  onPressed: ,
+          //  icon: Icon(
+          //    Icons.volume = 0.0 ? Icons.volume_off : Icons.volume_up,,
+          //  ),
+          //  color: Theme.of(context).primaryColor,
+          //  iconSize: 36.0,
+          //),
+        ],
+      )
+      
+    );
+  }
+}
+//end seekbar
 
 class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
@@ -68,23 +178,23 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     if(oldWidget.booruItem != widget.booruItem) {
       // reset stuff here
       firstViewFix = false;
-      resetZoom();
-      switch (settingsHandler.videoCacheMode) {
-        case 'Cache':
-          // TODO load video in bg without destroying the player object, then replace with a new one
-          killLoading([]);
-          initVideo(false);
-          break;
-
-        case 'Stream+Cache':
-          changeNetworkVideo();
-          break;
-
-        case 'Stream':
-        default:
-          changeNetworkVideo();
-          break;
-      }
+      //resetZoom();
+      //switch (settingsHandler.videoCacheMode) {
+      //  case 'Cache':
+      //    // TODO load video in bg without destroying the player object, then replace with a new one
+      //    killLoading([]);
+      //    initVideo(false);
+      //    break;
+//
+      //  case 'Stream+Cache':
+      //    changeNetworkVideo();
+      //    break;
+//
+      //  case 'Stream':
+      //  default:
+      //    changeNetworkVideo();
+      //    break;
+      //}
       updateState();
     }
     super.didUpdateWidget(oldWidget);
@@ -228,12 +338,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       vidcontroller = await VideoController.create(controller.handle);
       setState(() {});
-     });
+      //sleep(Duration(seconds:1));
+      playVid();
+    });
           
     viewerHandler.addViewed(widget.key);
-
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     isViewed = settingsHandler.appMode.value.isMobile
       ? searchHandler.viewedIndex.value == widget.index
@@ -247,24 +356,21 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       } else {
         isViewed = false;
       }
-
-      
-
       if (prevViewed != isViewed) {
         if (!isViewed) {
-          // reset zoom if not viewed
-          resetZoom();
+         // reset zoom if not viewed
+         resetZoom();
         }
         updateState();
       }
     });
 
+    bool isVisible = false;
     initVideo(false);
   }
 
   void updateState() {
     if(mounted) {
-      
       setState(() { });
     }
   }
@@ -320,8 +426,9 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void disposables() {
     // controller?.setVolume(0);
-    controller?.pause();
-    controller?.dispose();
+    controller.pause();
+    controller.dispose();
+    vidcontroller?.dispose();
     //controller = null;
 
     if (!(_cancelToken != null && _cancelToken!.isCancelled)){
@@ -351,110 +458,42 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     scaleController.scaleState = PhotoViewScaleState.initial;
   }
 
-  void scrollZoomImage(double value) {
-    final double upperLimit = min(8, (viewController.scale ?? 1) + (value / 200));
-    // zoom on which image fits to container can be less than limit
-    // therefore don't clump the value to lower limit if we are zooming in to avoid unnecessary zoom jumps
-    final double lowerLimit = value > 0 ? upperLimit : max(0.75, upperLimit);
-
-    // print('ll $lowerLimit $value');
-    // if zooming out and zoom is smaller than limit - reset to container size
-    // TODO minimal scale to fit can be different from limit
-    if(lowerLimit == 0.75 && value < 0) {
-      scaleController.scaleState = PhotoViewScaleState.initial;
-    } else {
-      viewController.scale = lowerLimit;
-    }
-  }
 
   void doubleTapZoom() {
     viewController.scale = 2;
     // scaleController.scaleState = PhotoViewScaleState.originalSize;
   }
 
-  Future<void> changeNetworkVideo() async {
-    if(_video != null) { 
-      print(_video!.path);  // if (settingsHandler.mediaCache || _video != null) {
-      // Start from cache if was already cached or only caching is allowed
-      media = Media(
-        _video!.path,
-        //startTime: const Duration(milliseconds: 50),
-      );
-    } else {
-      print(widget.booruItem.fileURL);
-      // Otherwise load from network
-      // print('uri: ${widget.booruItem.fileURL}');
-      media = Media(
-        widget.booruItem.fileURL,
-        //extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        //startTime: const Duration(milliseconds: 50),
-      );
-    }
-    isLoaded = true;
-
-    controller!.open(
-      Playlist(
-        [
-        media!//,controller
-      //autoStart: settingsHandler.autoPlayEnabled,
-        ],
-      ),
-    );
-  }
 
   Future<void> initPlayer() async {
     if(_video != null) { 
-      print(_video!.path);  // if (settingsHandler.mediaCache || _video != null) {
-      // Start from cache if was already cached or only caching is allowed
+      print(_video!.path);
+
       media = Media(
         _video!.path,
-        // move start a bit forward to help avoid playback start issues
-        //startTime: const Duration(milliseconds: 50),
+
       );
     } else {
       print(widget.booruItem.fileURL);
-      // Otherwise load from network
-      // print('uri: ${widget.booruItem.fileURL}');
       media = Media(
         Uri.encodeFull(widget.booruItem.fileURL),
-        //extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        //startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
-
-    //controller = Player();//(id: widget.index);
-    //controller!.setUserAgent(Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: false).entries.first.value);
-    controller!.volume = viewerHandler.videoVolume;
-    // controller!.open(
-    //   media!,
-    //   autoStart: settingsHandler.autoPlayEnabled,
-    // );
-
-    //controller!.playbackStream.listen((PlaybackState state) {
-      // dart_vlc has loop logic integrated into playlists, but it is not working?
-      // this will force restart videos on completion
-
-      //if(Player.state.isPlaying) {
-      //  if(Player.state.isCompleted) {
-      //    controller!.play();
-      //  }
-      //}
-    //});
-
-    
-    //controller!.generalStream.listen((GeneralState state) {
-    //  viewerHandler.videoVolume = state.volume;
-    //});
-
-    //controller!.errorStream.listen((String error) {
-    //  if(error.isNotEmpty) {
-    //    killLoading(['Error:', error]);
-    //  }
-    //});
+    controller.volume = viewerHandler.videoVolume;
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
+  }
+
+  Future<void> playVid() async {
+    await controller.open(
+      Playlist(
+        [
+          media!
+        ],
+      ),
+    );
   }
 
   @override
@@ -462,6 +501,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // print('!!! Build video desktop ${widget.index}!!!');
     
     bool initialized = isLoaded; // controller != null;
+    bool isVisible = false;
+    bool mounted = false;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     int viewedIndex = searchHandler.viewedIndex.value;
@@ -471,34 +512,27 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          controller!.seek(Duration.zero);
+          controller.seek(Duration.zero);
         }
 
-        if(!firstViewFix) {
-          controller!.open(
-            Playlist(
-              [
-              media!//,
-              //autoStart: settingsHandler.autoPlayEnabled,
-              ],
-            ),
-          );
-          firstViewFix = true;
-        }
+        //if(!firstViewFix) {
+        //  playVid();
+        //  firstViewFix = true;
+        //}
 
         // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
-        if (settingsHandler.autoPlayEnabled) {
-          // autoplay if viewed and setting is enabled
-            controller!.play();
-        } else {
-          controller!.pause();
-        }
+        //if (settingsHandler.autoPlayEnabled) {
+        //// autoplay if viewed and setting is enabled
+        //  controller.play();
+        //} else {
+        //  controller.pause();
+        //}
 
-        if (viewerHandler.videoAutoMute) {
-          controller!.volume = 0;
-        }
-      } else {
-        controller!.pause();
+      //if (viewerHandler.videoAutoMute) {
+      //  controller.volume = 0;
+      //}
+      //} else {
+      //  controller.pause();
       }
     }
 
@@ -506,77 +540,28 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       _lastViewedIndex = viewedIndex;
     }
 
-    // TODO move controls outside, to exclude them from zoom
-
-    return Hero(
-      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
-      child: Material(
-        child: Listener(
-          onPointerSignal: (pointerSignal) {
-            if(pointerSignal is PointerScrollEvent) {
-              scrollZoomImage(pointerSignal.scrollDelta.dy);
-            }
-          },
-          child: PhotoView.customChild(
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 8,
-            initialScale: PhotoViewComputedScale.contained,
-            enableRotation: false,
-            basePosition: Alignment.center,
-            controller: viewController,
-            // tightMode: true,
-            scaleStateController: scaleController,
-            child: Stack(
-              children: [
-                Thumbnail(
-                  item: widget.booruItem,
-                  index: widget.index,
-                  isStandalone: false,
-                  ignoreColumnsCount: true,
-                ),
-                MediaLoading(
-                  item: widget.booruItem,
-                  hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
-                  isFromCache: isFromCache,
-                  isDone: initialized && firstViewFix,
-                  isTooBig: isTooBig > 0,
-                  isStopped: isStopped,
-                  stopReasons: stopReason,
-                  isViewed: isViewed,
-                  total: _total,
-                  received: _received,
-                  startedAt: _startedAt,
-                  startAction: () {
-                    if(isTooBig == 1) {
-                      isTooBig = 2;
-                    }
-                    initVideo(true);
-                    updateState();
-                  },
-                  stopAction: () {
-                    killLoading(['Stopped by User']);
-                  },
-                ),
-
-                if(isViewed && initialized)
-                  Video(
-                    controller: vidcontroller,
-                    //scale: 1.0,
-                    //progressBarInactiveColor: Colors.grey,
-                    //progressBarActiveColor: accentColor,
-                    //progressBarThumbColor: accentColor,
-                    //volumeThumbColor: accentColor,
-                    //volumeActiveColor: accentColor,
-                    //showControls: true,
-                    //showFullscreenButton: true,
-                    //filterQuality: FilterQuality.medium,
-                    //showTimeLeft: true,
-                  ),
-              ],
-            ),
-          )
-        )
-      )
-    );
+    return Stack(
+           //alignment: Alignment.bottomCenter,
+            children: [
+             Center(child: Video(controller: vidcontroller)),
+                //if(isVisible)
+                Container(
+                  child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Container(
+                    color: Color.fromARGB(125, 0, 0, 0),
+                    child: SeekBar(vidcontroller: controller),
+                  )
+                )
+              ),
+              MouseRegion(
+                onEnter: (PointerEvent details)=>setState(()=>isVisible = true),
+                onExit: (PointerEvent details)=>setState(()=>isVisible = false),
+                opaque: false,
+              )
+            ]
+          );
+          
+          
   }
 }
