@@ -22,15 +22,15 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) dart_vlc_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "DartVlcPlugin");
   dart_vlc_plugin_register_with_registrar(dart_vlc_registrar);
+  g_autoptr(FlPluginRegistrar) dynamic_color_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "DynamicColorPlugin");
+  dynamic_color_plugin_register_with_registrar(dynamic_color_registrar);
   g_autoptr(FlPluginRegistrar) media_kit_libs_linux_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "MediaKitLibsLinuxPlugin");
   media_kit_libs_linux_plugin_register_with_registrar(media_kit_libs_linux_registrar);
   g_autoptr(FlPluginRegistrar) media_kit_video_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "MediaKitVideoPlugin");
   media_kit_video_plugin_register_with_registrar(media_kit_video_registrar);
-  g_autoptr(FlPluginRegistrar) dynamic_color_registrar =
-      fl_plugin_registry_get_registrar_for_plugin(registry, "DynamicColorPlugin");
-  dynamic_color_plugin_register_with_registrar(dynamic_color_registrar);
   g_autoptr(FlPluginRegistrar) screen_retriever_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "ScreenRetrieverPlugin");
   screen_retriever_plugin_register_with_registrar(screen_retriever_registrar);

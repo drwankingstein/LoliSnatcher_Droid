@@ -232,12 +232,12 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
       onError: _onError,
-      onDoneFile: (File file, String url) {
+      onDoneFile: (File file) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
         if(controller == null && !isLoaded) {
@@ -247,14 +247,9 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: 'media',
-      fileNameExtras: widget.booruItem.fileNameExtras
+      fileNameExtras: widget.booruItem.fileNameExtras,
     );
-    // client!.runRequest();
-    if(settingsHandler.disableImageIsolates) {
-      client!.runRequest();
-    } else {
-      client!.runRequestIsolate();
-    }
+    unawaited(client!.runRequest());
     return;
   }
 
@@ -262,7 +257,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
       fileNameExtras: widget.booruItem.fileNameExtras

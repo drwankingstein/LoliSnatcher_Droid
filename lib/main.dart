@@ -5,15 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:app_links/app_links.dart';
-<<<<<<< HEAD
 
 //import 'package:dart_vlc/dart_vlc.dart';
 import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_core_video/media_kit_core_video.dart';
-=======
->>>>>>> ed8eda4 (Clean and add media bar)
+//import 'package:media_kit/media_kit.dart';
+//import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
@@ -44,12 +41,8 @@ import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-<<<<<<< HEAD
   if (Platform.isWindows || Platform.isLinux) {
     //await DartVLC.initialize();
-=======
-  if (Platform.isWindows || Platform.isLinux) { 
->>>>>>> ed8eda4 (Clean and add media bar)
 
     // Init db stuff
     sqfliteFfiInit();

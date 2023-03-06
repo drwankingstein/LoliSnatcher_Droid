@@ -5,9 +5,9 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   dart_vlc
+  dynamic_color
   media_kit_libs_linux
   media_kit_video
-  dynamic_color
   screen_retriever
   url_launcher_linux
   window_manager

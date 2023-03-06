@@ -38,17 +38,14 @@ dependencies:
     git:
       url: https://github.com/alexmercerind/media_kit/
       path: media_kit
-    #path: "../media_kit/media_kit"
   media_kit_video:
     git:
       url: https://github.com/alexmercerind/media_kit/
       path: media_kit_video
-    #path: "../media_kit/media_kit_core_video"
   media_kit_libs_windows_video:
     git:
       url: https://github.com/alexmercerind/media_kit/
       path: media_kit_libs_windows_video
-    #path: "../media_kit/media_kit_core_video"
   media_kit_libs_linux:
     git:
       url: https://github.com/alexmercerind/media_kit/
